@@ -30,6 +30,8 @@ basic_encouragments = [
   "Tomorrow will be better", "Time will elapse", "Sunny day coming"
 ]
 
+if "responding" not in db.keys():
+  db["responding"] = True
 
 def update_db(val):
   if "encouragements" in db.keys():
@@ -80,16 +82,19 @@ async def on_message(message):
 
   msg = message.content
 
-  if msg.startswith("$inspire"):
-    await message.channel.send(get_quote())
+  if db["responding"] == True:
+    if msg.startswith("$inspire"):
+      await message.channel.send(get_quote())
 
-  options = basic_encouragments
-
-  if "encouragements" in db.keys():
-    options = options + db["encouragements"].value
-
-  if any(m in msg for m in sad_phrases):
-    await message.channel.send(random.choice(options))
+    options = basic_encouragments
+  
+    if "encouragements" in db.keys():
+      options = options + db["encouragements"].value
+  
+    if any(m in msg for m in sad_phrases):
+      await message.channel.send(random.choice(options))
+      return
+  
 
   if msg.startswith("$new"):
     new_msg = msg.split("$new ", 1)[1]
@@ -106,6 +111,15 @@ async def on_message(message):
 
   if msg == "$list":
     await message.channel.send(show_db())
+
+  if msg.startswith("$responding"):
+    value = msg.split("$responding ", 1)[1]
+    if value.lower == "true":
+      db["responding"] = True
+      await message.channel.send("Bot on")
+    else:
+      db["responding"] = False
+      await message.channel.send("Bot Off")
 
 
 client.run(os.getenv('Token'))
